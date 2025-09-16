@@ -1,3 +1,4 @@
+> [!NOTE]
 > Check out [nichind/singbox2proxy](https://github.com/nichind/singbox2proxy), a similar library with better performance and more features, supporting SingBox links (hy2://, tuic://, etc.) in addition to V2Ray links, chaining support & built-in http client.
 
 
