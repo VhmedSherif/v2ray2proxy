@@ -1,7 +1,7 @@
 name: Deploy Permanent Free Proxy
 
 on:
-  workflow_dispatch: # يتيح لك تشغيل السيرفر يدوياً بضغطة زر
+  workflow_dispatch:
 
 jobs:
   build:
@@ -23,18 +23,13 @@ jobs:
     - name: Install Ngrok
       run: |
         curl -s https://amazonaws.com | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
-        echo "deb https://amazonaws.com buster main" | sudo tee /etc/apt/sources.list.dir/ngrok.list
+        echo "deb https://amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
         sudo apt-get update && sudo apt-get install ngrok
 
     - name: Start Proxy & Ngrok Tunnel
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        # تشغيل سكريبت v2ray2proxy في الخلفية على بورت 8080
         python -m v2ray2proxy --port 8080 &
-        
-        # ربط وتفعيل حساب نجروك
         ngrok config add-authtoken $NGROK_AUTH_TOKEN
-        
-        # فتح النفق العام وإظهار الرابط لك
         ngrok http 8080 --log=stdout
