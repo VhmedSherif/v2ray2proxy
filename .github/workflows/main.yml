@@ -23,12 +23,12 @@ jobs:
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
       run: |
-        # تثبيت ngrok الرسمي عبر أداة snap المدمجة بالنظام
+        # تثبيت ngrok
         sudo snap install ngrok
         
         # تشغيل سكريبت v2ray2proxy في الخلفية
         python -m v2ray2proxy --port 8080 &
         
-        # تفعيل الحساب وتشغيل النفق
-        ngrok config add-authtoken $NGROK_AUTH_TOKEN
-        ngrok http 8080 --log=stdout
+        # تفعيل الحساب وتشغيل النفق باستخدام صلاحيات المسؤول الكاملة sudo
+        sudo ngrok config add-authtoken $NGROK_AUTH_TOKEN
+        sudo ngrok http 8080 --log=stdout
