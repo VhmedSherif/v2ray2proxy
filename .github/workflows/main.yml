@@ -6,35 +6,34 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
     - name: Install Dependencies
       run: |
         pip install -r requirements.txt
+        pip install -e .
 
     - name: Run Ngrok + Proxy
       env:
-        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+        V2RAY_LINK: ${{ secrets.V2RAY_LINK }}
       run: |
-        # تثبيت نجروك
-        sudo snap install ngrok
-        
-        # إنشاء مجلد الإعدادات يدوياً وإعطائه كامل الصلاحيات لتجنب خطأ الإذن
-        mkdir -p /home/runner/.config/ngrok
-        chmod 777 /home/runner/.config/ngrok
-        
-        # تشغيل سكريبت v2ray2proxy بالصيغة الصحيحة في الخلفية
-        python -m v2ray2proxy &
-        
-        # تفعيل حساب نجروك مع تحديد مسار ملف الإعدادات المفتوح الصلاحيات
-        ngrok config add-authtoken $NGROK_AUTH_TOKEN --config /home/runner/.config/ngrok/ngrok.yml
-        
-        # تشغيل النفق على المنفذ الافتراضي للسكربت (غالباً 8080 أو المنفذ المحلي)
-        ngrok http 8080 --config /home/runner/.config/ngrok/ngrok.yml --log=stdout
+        # تثبيت ngrok مباشرة كـ binary لتجنب حظر صلاحيات snap
+        curl -sSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz | sudo tar xvz -C /usr/local/bin
+
+        # تشغيل v2ray2proxy في الخلفية مع تحديد البورت والرابط
+        python -m v2ray2proxy "$V2RAY_LINK" --http-port 8080 &
+
+        # انتظار ثواني للتأكد من قيام البروكسي المحلي
+        sleep 3
+
+        # تشغيل النفق مباشرة (يلتقط NGROK_AUTHTOKEN تلقائياً من الـ env)
+        ngrok http 8080 --log=stdout
