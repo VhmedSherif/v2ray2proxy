@@ -8,17 +8,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
     - name: Start Proxy Server & Tunnel
       run: |
-        # تثبيت أداة pproxy لإنشاء بروكسي HTTP و SOCKS5 من السيرفر مباشرة
+        # تثبيت أداة pproxy على Python 3.10
         pip install pproxy
 
         # تشغيل البروكسي في الخلفية على بورت 8080
         pproxy -l http+socks5://0.0.0.0:8080 &
         sleep 2
 
-        # تحميل أداة bore لفتح نفق TCP مجاني بدون الحاجة لكارت بنكي في Ngrok
+        # تحميل وتشغيل أداة bore
         curl -Ls https://github.com/ekzhang/bore/releases/download/v0.5.2/bore-v0.5.2-x86_64-unknown-linux-musl.tar.gz | sudo tar xz -C /usr/local/bin
-
-        # تشغيل النفق وطباعة رابط البروكسي في اللوج
         bore local 8080 --to bore.pub
